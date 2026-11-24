@@ -10,6 +10,7 @@ Os originais ficam em <pasta do jogo>\\PTBR_backup. Feche o jogo antes.
 """
 import hashlib
 import json
+import struct
 import os
 import shutil
 import subprocess
@@ -24,6 +25,7 @@ from majikoi_ptbr.pac import read_pac, replace_in_place, write_pac  # noqa: E402
 
 BACKUP = "PTBR_backup"
 FILES = ("Script.pac", "Config.pac")
+LOGO_PAC, LOGO_NAME = "Visual.pac", b"start_logo.bmp"  # tela de abertura: ganha a logo do Professor Dazai
 
 
 def sha1(p: Path) -> str:
@@ -81,6 +83,42 @@ def aplicar_config(src: Path, dst: Path, trad: dict) -> tuple:
     return feitos, pulados
 
 
+def _tail(path: Path):
+    """(onde comeca o indice, bytes do indice + u32 final) de um .pac."""
+    with open(path, "rb") as f:
+        f.seek(-4, 2)
+        size = struct.unpack("<I", f.read(4))[0]
+        start = f.seek(-4 - size, 2)
+        return start, f.read()
+
+
+def logo_instalar(game: Path, bk: Path) -> None:
+    pac = game / LOGO_PAC
+    bmp = HERE / "assets" / "start_logo.bmp"
+    if not pac.is_file() or not bmp.is_file():
+        return
+    info = bk / (LOGO_PAC + ".info")
+    if info.is_file():  # reaplicacao: volta ao indice original antes
+        logo_restaurar(game, bk)
+    start, tail = _tail(pac)
+    (bk / (LOGO_PAC + ".tail")).write_bytes(tail)
+    info.write_text(str(start))
+    replace_in_place(pac, {LOGO_NAME: bmp.read_bytes()})
+    print("Logo do Professor Dazai colocada na abertura.")
+
+
+def logo_restaurar(game: Path, bk: Path) -> None:
+    info, tail = bk / (LOGO_PAC + ".info"), bk / (LOGO_PAC + ".tail")
+    if not (info.is_file() and tail.is_file()):
+        return
+    with open(game / LOGO_PAC, "r+b") as f:
+        f.seek(int(info.read_text()))
+        f.truncate()
+        f.write(tail.read_bytes())
+    info.unlink()
+    tail.unlink()
+
+
 def instalar(game: Path, com_fonte: bool) -> None:
     trad = json.loads((HERE / "traducao" / "majikoi-ptbr.json").read_text(encoding="utf-8"))
     bk = game / BACKUP
@@ -96,6 +134,8 @@ def instalar(game: Path, com_fonte: bool) -> None:
     os.replace(t, game / "Script.pac")
     if c.is_file():
         os.replace(c, game / "Config.pac")
+    if "--sem-logo" not in sys.argv:
+        logo_instalar(game, bk)
     print(f"Textos do roteiro gravados: {n_script}. Textos de menu: {n_cfg} (pulados: {pulados}).")
     if com_fonte:
         try:
@@ -119,6 +159,7 @@ def restaurar(game: Path) -> None:
     for n in FILES:
         if (bk / n).is_file():
             shutil.copy2(bk / n, game / n)
+    logo_restaurar(game, bk)
     try:
         from majikoi_ptbr import font
         font.switch_config_font(font.config_dat(), to_accents=False)

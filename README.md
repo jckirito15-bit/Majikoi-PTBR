@@ -1,3 +1,5 @@
+<p align="center"><img src="logo-professor-dazai.png" width="320" alt="Professor Dazai"></p>
+
 # Majikoi! Love Me Seriously! — Tradução PT-BR (Steam) / Brazilian Portuguese translation
 
 **Tradução feita por Professor Dazai** · *Translation by Professor Dazai* · **Versão / Version 1.0**
@@ -34,6 +36,9 @@ português do Brasil: falas, nomes, escolhas e textos de menu, com acentos.
 
 **Sem a fonte com acentos:** adicione `--sem-fonte` (os textos ficam em português, mas sem acento).
 
+**Sem a logo na abertura:** adicione `--sem-logo`. Por padrão a logo do Professor Dazai aparece na abertura do jogo
+(no lugar da segunda tela de logo; a logo da Minato Soft continua). `--restaurar` devolve tudo.
+
 ### Observações
 
 - A tradução foi feita para o jogo da Steam original; se o número de linhas de um script não bater, o instalador para
@@ -56,7 +61,7 @@ No game files are included: only the translated text (`traducao/majikoi-ptbr.jso
 4. **Close the game**, then run `python aplicar.py "<game folder>"`.
 5. Start the game. To undo: `python aplicar.py "<game folder>" --restaurar` (originals are kept in `PTBR_backup`).
 
-Add `--sem-fonte` to skip the accent font. Translated menu images are not part of 1.0.
+Add `--sem-fonte` to skip the accent font and `--sem-logo` to skip the Professor Dazai logo in the opening. Translated menu images are not part of 1.0.
 
 ## Créditos / Credits
 
