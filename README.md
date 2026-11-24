@@ -46,6 +46,8 @@ português do Brasil: falas, nomes, escolhas e textos de menu, com acentos.
 
 - A tradução foi feita para o jogo da Steam original; se o número de linhas de um script não bater, o instalador para
   e avisa, sem estragar nada.
+- **Em jogo recém-instalado:** abra o jogo uma vez, feche e rode o `aplicar.py` de novo. O jogo só cria o arquivo de
+  opções (em Documentos) depois da primeira abertura, e é ele que liga a fonte com acentos.
 - A fonte "TraduVN Maru" é gerada a partir da fonte do próprio jogo e instalada só para o seu usuário do Windows
   (sem administrador). Ela só existe para desenhar os acentos.
 - As imagens traduzidas são acrescentadas ao fim do `System.pac` (o resto do arquivo não é tocado); `--restaurar` devolve o índice original.

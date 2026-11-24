@@ -158,8 +158,11 @@ def instalar(game: Path, com_fonte: bool) -> None:
             ttf = game / font.GAME_FONT_FILE
             if ttf.is_file():
                 font.install_font(game)
-                font.switch_config_font(font.config_dat(), to_accents=True)
-                print("Fonte com acentos instalada (TraduVN Maru, so para o seu usuario).")
+                if font.switch_config_font(font.config_dat(), to_accents=True):
+                    print("Fonte com acentos instalada (TraduVN Maru, so para o seu usuario).")
+                else:
+                    print("ATENCAO: abra o jogo UMA vez (ele cria o arquivo de opcoes), feche e rode este comando "
+                          "de novo para ligar a fonte com acentos.")
             else:
                 print("Aviso: MotoyaLMaruM.ttf nao esta na pasta; sem a fonte os acentos saem errados.")
         except Exception as ex:  # sem fontTools/Windows: os textos ficam, os acentos nao
