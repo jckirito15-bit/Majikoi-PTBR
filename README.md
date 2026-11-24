@@ -12,7 +12,8 @@ português do Brasil: falas, nomes, escolhas e textos de menu, com acentos.
 
 ## O que tem aqui
 
-- `traducao/majikoi-ptbr.json`: a tradução (157 mil linhas do roteiro + 386 textos de menu), com o número de cada linha.
+- `traducao/majikoi-ptbr.json`: a tradução (157 mil linhas do roteiro + 386 textos de menu) e as imagens de menu traduzidas, com o número de cada linha.
+- `imagens/System/`: as 596 imagens traduzidas (menus, botões, configurações, datas e dias da semana, telas de batalha).
 - `aplicar.py`: instala a tradução no seu jogo (faz backup e dá para voltar ao original).
 - `majikoi_ptbr/`: o código que lê e grava os `.pac` do NeXAS e instala a fonte com acentos.
 - `tools/extrair_traducao.py`: ferramenta do autor que gerou o JSON a partir do jogo já traduzido.
@@ -36,6 +37,8 @@ português do Brasil: falas, nomes, escolhas e textos de menu, com acentos.
 
 **Sem a fonte com acentos:** adicione `--sem-fonte` (os textos ficam em português, mas sem acento).
 
+**Sem as imagens traduzidas:** `--sem-imagens` (ficam os menus em inglês).
+
 **Sem a logo na abertura:** adicione `--sem-logo`. Por padrão a logo do Professor Dazai aparece na abertura do jogo
 (no lugar da segunda tela de logo; a logo da Minato Soft continua). `--restaurar` devolve tudo.
 
@@ -45,7 +48,7 @@ português do Brasil: falas, nomes, escolhas e textos de menu, com acentos.
   e avisa, sem estragar nada.
 - A fonte "TraduVN Maru" é gerada a partir da fonte do próprio jogo e instalada só para o seu usuário do Windows
   (sem administrador). Ela só existe para desenhar os acentos.
-- **Imagens traduzidas (telas de menu em PNG) ainda não estão incluídas** na 1.0: só texto.
+- As imagens traduzidas são acrescentadas ao fim do `System.pac` (o resto do arquivo não é tocado); `--restaurar` devolve o índice original.
 - Windows. Se a Steam atualizar o jogo e desfizer a tradução, rode o `aplicar.py` de novo.
 
 ---
@@ -61,7 +64,7 @@ No game files are included: only the translated text (`traducao/majikoi-ptbr.jso
 4. **Close the game**, then run `python aplicar.py "<game folder>"`.
 5. Start the game. To undo: `python aplicar.py "<game folder>" --restaurar` (originals are kept in `PTBR_backup`).
 
-Add `--sem-fonte` to skip the accent font and `--sem-logo` to skip the Professor Dazai logo in the opening. Translated menu images are not part of 1.0.
+Add `--sem-fonte` to skip the accent font and `--sem-logo` to skip the Professor Dazai logo in the opening. Translated menu/UI images are included (`--sem-imagens` to skip).
 
 ## Créditos / Credits
 

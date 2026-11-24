@@ -3,7 +3,8 @@
 Uso:
     python aplicar.py "<pasta do jogo>"              instala a traducao (faz backup dos originais)
     python aplicar.py "<pasta do jogo>" --restaurar  volta ao jogo original
-    python aplicar.py "<pasta do jogo>" --sem-fonte  instala so os textos (sem a fonte com acentos)
+    python aplicar.py "<pasta do jogo>" --sem-fonte  instala sem a fonte com acentos
+    (outras opcoes: --sem-imagens, --sem-logo)
 
 A pasta do jogo e a que tem Majikoi.exe e Script.pac (Steam: botao direito no jogo > Gerenciar > Ver arquivos locais).
 Os originais ficam em <pasta do jogo>\\PTBR_backup. Feche o jogo antes.
@@ -92,31 +93,43 @@ def _tail(path: Path):
         return start, f.read()
 
 
-def logo_instalar(game: Path, bk: Path) -> None:
-    pac = game / LOGO_PAC
-    bmp = HERE / "assets" / "start_logo.bmp"
-    if not pac.is_file() or not bmp.is_file():
-        return
-    info = bk / (LOGO_PAC + ".info")
+def pac_instalar(bk: Path, pac: Path, repl: dict) -> None:
+    """Acrescenta arquivos novos ao fim de um .pac grande e guarda so o indice original (para restaurar)."""
+    info, tailf = bk / (pac.name + ".info"), bk / (pac.name + ".tail")
     if info.is_file():  # reaplicacao: volta ao indice original antes
-        logo_restaurar(game, bk)
+        pac_restaurar(bk, pac)
     start, tail = _tail(pac)
-    (bk / (LOGO_PAC + ".tail")).write_bytes(tail)
+    tailf.write_bytes(tail)
     info.write_text(str(start))
-    replace_in_place(pac, {LOGO_NAME: bmp.read_bytes()})
-    print("Logo do Professor Dazai colocada na abertura.")
+    replace_in_place(pac, repl)
 
 
-def logo_restaurar(game: Path, bk: Path) -> None:
-    info, tail = bk / (LOGO_PAC + ".info"), bk / (LOGO_PAC + ".tail")
-    if not (info.is_file() and tail.is_file()):
+def pac_restaurar(bk: Path, pac: Path) -> None:
+    info, tailf = bk / (pac.name + ".info"), bk / (pac.name + ".tail")
+    if not (info.is_file() and tailf.is_file() and pac.is_file()):
         return
-    with open(game / LOGO_PAC, "r+b") as f:
+    with open(pac, "r+b") as f:
         f.seek(int(info.read_text()))
         f.truncate()
-        f.write(tail.read_bytes())
+        f.write(tailf.read_bytes())
     info.unlink()
-    tail.unlink()
+    tailf.unlink()
+
+
+def imagens_instalar(game: Path, bk: Path) -> None:
+    pasta = HERE / "imagens" / "System"
+    pac = game / "System.pac"
+    if pac.is_file() and pasta.is_dir():
+        repl = {f.name.encode("cp932"): f.read_bytes() for f in sorted(pasta.iterdir())}
+        pac_instalar(bk, pac, repl)
+        print(f"Imagens traduzidas (menus, botoes, datas, batalha): {len(repl)}.")
+
+
+def logo_instalar(game: Path, bk: Path) -> None:
+    pac, bmp = game / LOGO_PAC, HERE / "assets" / "start_logo.bmp"
+    if pac.is_file() and bmp.is_file():
+        pac_instalar(bk, pac, {LOGO_NAME: bmp.read_bytes()})
+        print("Logo do Professor Dazai colocada na abertura.")
 
 
 def instalar(game: Path, com_fonte: bool) -> None:
@@ -134,6 +147,8 @@ def instalar(game: Path, com_fonte: bool) -> None:
     os.replace(t, game / "Script.pac")
     if c.is_file():
         os.replace(c, game / "Config.pac")
+    if "--sem-imagens" not in sys.argv:
+        imagens_instalar(game, bk)
     if "--sem-logo" not in sys.argv:
         logo_instalar(game, bk)
     print(f"Textos do roteiro gravados: {n_script}. Textos de menu: {n_cfg} (pulados: {pulados}).")
@@ -159,7 +174,8 @@ def restaurar(game: Path) -> None:
     for n in FILES:
         if (bk / n).is_file():
             shutil.copy2(bk / n, game / n)
-    logo_restaurar(game, bk)
+    pac_restaurar(bk, game / LOGO_PAC)
+    pac_restaurar(bk, game / "System.pac")
     try:
         from majikoi_ptbr import font
         font.switch_config_font(font.config_dat(), to_accents=False)
